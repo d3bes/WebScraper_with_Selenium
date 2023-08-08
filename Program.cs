@@ -45,24 +45,27 @@ namespace webScraper
 
     string language = "ar";
     int loops=10;
-        driver.Navigate().GoToUrl("https://www.amazon.eg/-/en");
 
 
     if(language=="en")
     {
-    var lang = driver.FindElement(By.ClassName("icp-nav-link-inner"));
-     lang.Click();
-    var en = driver.FindElement(By.XPath("//*[@id=\"icp-language-settings\"]/div[3]/div/label/i"));
-    en.Click();
-            Thread.Sleep(2000);
+    // var lang = driver.FindElement(By.ClassName("icp-nav-link-inner"));
+    //  lang.Click();
+    // var en = driver.FindElement(By.XPath("//*[@id=\"icp-language-settings\"]/div[3]/div/label/i"));
+    // en.Click();
+    //         Thread.Sleep(2000);
 
-    var save= driver.FindElement(By.ClassName("a-button-input"));
-    save.Click();
+    // var save= driver.FindElement(By.ClassName("a-button-input"));
+    // save.Click();
 
     // var re = driver.FindElement(By.Id("nav-logo-sprites"));
     // re.Click();
-        driver.Navigate().GoToUrl("https://www.amazon.eg/");
+    driver.Navigate().GoToUrl("https://www.amazon.eg/-/en");
+
     }
+    else
+     driver.Navigate().GoToUrl("https://www.amazon.eg/");
+
 
     var searchbar= driver.FindElement(By.Id("twotabsearchtextbox"));
     searchbar.SendKeys("headphones");
@@ -70,27 +73,35 @@ namespace webScraper
 
     for(var i = 0; i <loops; i++)
     {
-    var cards = driver.FindElements(By.XPath("//span[@class='a-size-base-plus a-color-base a-text-normal']"));
+var cards = driver.FindElements(By.XPath("//span[@class='a-size-base-plus a-color-base a-text-normal']"));
 
-    foreach (var x in cards)
-    {
-        Console.WriteLine(x.Text);
-    }
+for (int j = 0; j < cards.Count; j++)
+{
+    // var currentCard = driver.FindElements(By.XPath("//span[@class='a-size-base-plus a-color-base a-text-normal']"))[i];
+    var currentCard = cards[j];
+    currentCard.Click();
+    Thread.Sleep(2000);
+    // Perform actions on the clicked element
 
-    var nextButton = driver.FindElement(By.CssSelector(".s-pagination-item.s-pagination-next.s-pagination-button.s-pagination-separator"));
+    driver.Navigate().Back();
 
-   
-    if (nextButton != null)
-    {
-        nextButton.Click();
-    }
-    else
-    {
-        // Exit the loop if there is no next button
-        break;
-    }
+    // Re-locate the elements after navigating back
+    cards = driver.FindElements(By.XPath("//span[@class='a-size-base-plus a-color-base a-text-normal']"));
+}
+
+    driver.FindElement(By.ClassName("s-pagination-next")).Click();
+    Thread.Sleep(2000);
+    // if (nextButton != null)
+    // {
+    //     nextButton.Click();
+    // }
+    // else
+    // {
+    //     // Exit the loop if there is no next button
+    //     break;
+    // }
     // Scroll down the page
-  //  ((IJavaScriptExecutor)driver).ExecuteScript("window.scrollTo(0, document.body.scrollHeight)");
+    // ((IJavaScriptExecutor)driver).ExecuteScript("window.scrollTo(0, document.body.scrollHeight)");
 
 
     }
