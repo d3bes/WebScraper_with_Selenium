@@ -1,7 +1,10 @@
 ﻿using System;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
+using WebScraper_with_Selenium;
+using WebScraper_with_Selenium.Services;
 
 namespace webScraper
     {
@@ -9,7 +12,15 @@ namespace webScraper
     {
         public static void Main(string[] args)
         {
+             Console.WriteLine("search about:");
+             string input = Console.ReadLine();
+
             IWebDriver driver = new ChromeDriver();
+            Service service = new Service();
+            List<Item> items = new List<Item>();
+            int id= 1 ;
+            string language = "ar";
+            int loops=10;
 
 //             driver.Navigate().GoToUrl("https://www.facebook.com/");
 //             Thread.Sleep(2000);
@@ -43,9 +54,8 @@ namespace webScraper
 //         foreach(var x in result)
 //         Console.WriteLine(x.Text);
 
-    string language = "ar";
-    int loops=10;
-
+  
+   
 
     if(language=="en")
     {
@@ -63,43 +73,78 @@ namespace webScraper
     driver.Navigate().GoToUrl("https://www.amazon.eg/-/en");
 
     }
-    else
+    else{
      driver.Navigate().GoToUrl("https://www.amazon.eg/");
+    }
 
-
-    var searchbar= driver.FindElement(By.Id("twotabsearchtextbox"));
-    searchbar.SendKeys("headphones");
+var searchbar= driver.FindElement(By.Id("twotabsearchtextbox"));
+// var searchbar= driver.FindElement(By.Id("nav-bb-search")); 
+    searchbar.SendKeys(input);
     searchbar.SendKeys(Keys.Enter);
+ 
+int Pages = 1; 
+// IWebElement Next =  driver.FindElement(By.ClassName("s-pagination-next"));
+// if(Next != null)
+// {
 
-    for(var i = 0; i <loops; i++)
-    {
+// }
+
+
+for(int i= 0; i<Pages ; i++){
 var cards = driver.FindElements(By.XPath("//span[@class='a-size-base-plus a-color-base a-text-normal']"));
 
-for (int j = 0; j < cards.Count; j++)
-{
-    // var currentCard = driver.FindElements(By.XPath("//span[@class='a-size-base-plus a-color-base a-text-normal']"))[i];
-    var currentCard = cards[j];
-    currentCard.Click();
-    Thread.Sleep(2000);
-    // Perform actions on the clicked element
 
-    driver.Navigate().Back();
+    for (int j = 0; j < cards.Count; j++)
+        {
+            var currentCard = cards[j];
+             Thread.Sleep(500);
+          ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", currentCard);
+            currentCard.Click();
+              Thread.Sleep(500);
 
-    // Re-locate the elements after navigating back
-    cards = driver.FindElements(By.XPath("//span[@class='a-size-base-plus a-color-base a-text-normal']"));
-}
+    
+        try{
+            // Perform actions on the clicked element
+            var item = service.GetAmazonItem(driver);
+            items.Add(item);
+            string jsonString = JsonConvert.SerializeObject(item);
+            Console.WriteLine(jsonString);
+            Console.WriteLine("----------------------------------------------------");
 
-    driver.FindElement(By.ClassName("s-pagination-next")).Click();
-    Thread.Sleep(2000);
-    // if (nextButton != null)
-    // {
-    //     nextButton.Click();
-    // }
-    // else
-    // {
-    //     // Exit the loop if there is no next button
-    //     break;
-    // }
+            driver.Navigate().Back();
+
+            // Re-locate the elements after navigating back
+            cards = driver.FindElements(By.XPath("//span[@class='a-size-base-plus a-color-base a-text-normal']"));
+        }
+        catch(ElementClickInterceptedException ex) {
+            Console.WriteLine( ex.Message );
+        }
+     
+
+        }
+    Thread.Sleep(500);
+    try {
+  IWebElement  Next =  driver.FindElement(By.ClassName("s-pagination-next"));
+
+    if(Next != null) 
+    {
+        Pages++;
+
+        Next.Click();
+    }
+    else
+    {
+     File.WriteAllText("data.json", "\n ]");
+    driver.Close();
+    Console.WriteLine("\n\n ---------------------------\n scapping done \n--------------------------- \n\n");
+    }
+    }
+    catch(NotFoundException ex){
+        Console.WriteLine(ex.Message);
+
+    }
+
+};
     // Scroll down the page
     // ((IJavaScriptExecutor)driver).ExecuteScript("window.scrollTo(0, document.body.scrollHeight)");
 
@@ -107,7 +152,7 @@ for (int j = 0; j < cards.Count; j++)
     }
 
       }
-    }
+      
+  }
 
-}
 
